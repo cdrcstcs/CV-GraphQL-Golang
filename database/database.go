@@ -40,6 +40,73 @@ func Connect() *DB {
 	}
 }
 
+
+func ConvertCreateStudentInputToStudent(createStudentInput *model.CreateStudentInput) *model.Student {
+	return &model.Student{
+		FirstName:        createStudentInput.FirstName,
+		LastName:         createStudentInput.LastName,
+		Email:            createStudentInput.Email,
+		Birthdate:        createStudentInput.Birthdate,
+		EnrollmentStatus: createStudentInput.EnrollmentStatus,
+		Guardians:        ConvertCreateGuardianInputsToGuardians(createStudentInput.Guardians),
+	}
+}
+
+// Function to convert a slice of CreateGuardianInput to a slice of Guardian
+func ConvertCreateGuardianInputsToGuardians(createGuardianInputs []*model.CreateGuardianInput) []*model.Guardian {
+	guardians := make([]*model.Guardian, len(createGuardianInputs))
+	for i, createGuardianInput := range createGuardianInputs {
+		guardians[i] = &model.Guardian{
+			Name:         createGuardianInput.Name,
+			Relationship: createGuardianInput.Relationship,
+			ContactInfo:  ConvertCreateContactInfoInputToContactInfo(createGuardianInput.ContactInfo),
+		}
+	}
+	return guardians
+}
+
+func ConvertCreateContactInfoInputToContactInfo(createContactInfoInput *model.CreateContactInfoInput) *model.ContactInfo {
+	return  &model.ContactInfo{
+		Phone: createContactInfoInput.Phone,
+		Email:  createContactInfoInput.Email,
+	}
+}
+
+func ConvertCreateTeacherInputToTeacher(createTeacherInput *model.CreateTeacherInput) *model.Teacher {
+	return &model.Teacher{
+		FirstName:  createTeacherInput.FirstName,
+		LastName:   createTeacherInput.LastName,
+		Email:      createTeacherInput.Email,
+		OfficeHours: createTeacherInput.OfficeHours,
+		Subjects:   createTeacherInput.Subjects,
+	}
+}
+func ConvertCreateCourseInputToCourse(createCourseInput *model.CreateCourseInput) *model.Course {
+	return &model.Course{
+		Title:        createCourseInput.Title,
+		Description:  createCourseInput.Description,
+		TeacherId:    createCourseInput.TeacherId,
+		Prerequisites: createCourseInput.Prerequisites,
+	}
+}
+func ConvertCreateClassInputToClass(createClassInput *model.CreateClassInput) *model.Class {
+	return &model.Class{
+		CourseId:  createClassInput.CourseId,
+		Schedule:  createClassInput.Schedule,
+		Location:  createClassInput.Location,
+	}
+}
+
+func ConvertCreateGradeInputToGrade(createGradeInput *model.CreateGradeInput) *model.Grade {
+	return &model.Grade{
+		CourseId:    createGradeInput.CourseId,
+		StudentId:   createGradeInput.StudentId,
+		Score:       createGradeInput.Score,
+		GradeLetter: createGradeInput.GradeLetter,
+		Comments:    createGradeInput.Comments,
+	}
+}
+
 // Student CRUD Operations
 func (db *DB) GetStudent(id string) *model.Student {
 	studentCollec := db.client.Database("school-management").Collection("students")
@@ -73,6 +140,7 @@ func (db *DB) GetStudents() []*model.Student {
 	return students
 }
 
+
 func (db *DB) CreateStudent(studentInfo model.CreateStudentInput) *model.Student {
 	studentCollec := db.client.Database("school-management").Collection("students")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -98,7 +166,7 @@ func (db *DB) CreateStudent(studentInfo model.CreateStudentInput) *model.Student
 		Email:            studentInfo.Email,
 		Birthdate:        studentInfo.Birthdate,
 		EnrollmentStatus: studentInfo.EnrollmentStatus,
-		Guardians:        studentInfo.Guardians,
+		Guardians:        ConvertCreateGuardianInputsToGuardians(studentInfo.Guardians),
 	}
 	return &returnStudent
 }
