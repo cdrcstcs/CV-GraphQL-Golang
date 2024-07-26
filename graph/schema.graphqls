@@ -1,0 +1,309 @@
+# Define a User type with roles and permissions
+type User {
+  _id: ID!
+  username: String!
+  email: String!
+  roles: [Role!]!
+}
+
+# Define roles for users
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+}
+
+# Define a Student type with detailed enrollment and guardian information
+type Student {
+  _id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  birthdate: String! # ISO date format
+  enrollmentStatus: EnrollmentStatus!
+  guardians: [Guardian!]!
+  enrolledCourses: [Course!]!
+  grades: [Grade!]!
+}
+
+# Enum for enrollment statuses
+enum EnrollmentStatus {
+  ENROLLED
+  WAITLISTED
+  DROPPED
+  GRADUATED
+}
+
+# Define a Guardian type for students
+type Guardian {
+  _id: ID!
+  name: String!
+  relationship: String! # e.g., "Parent", "Guardian"
+  contactInfo: ContactInfo!
+}
+
+# Define a ContactInfo type
+type ContactInfo {
+  phone: String
+  email: String
+}
+
+# Define a Teacher type with office hours and subjects taught
+type Teacher {
+  _id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  officeHours: String! # e.g., "Monday 2:00PM - 4:00PM"
+  subjects: [Subject!]!
+  courses: [Course!]!
+}
+
+# Define a Subject type
+type Subject {
+  _id: ID!
+  name: String!
+}
+
+# Define a Course type with detailed class information and prerequisites
+type Course {
+  _id: ID!
+  title: String!
+  description: String!
+  teacher: Teacher!
+  students: [Student!]!
+  classes: [Class!]!
+  prerequisites: [Course!] # Courses that must be completed before this one
+}
+
+# Define a Class type with detailed scheduling and room assignments
+type Class {
+  _id: ID!
+  course: Course!
+  schedule: [ClassSchedule!]!
+  location: Room!
+  students: [Student!]!
+}
+
+# Define a ClassSchedule type for flexible scheduling
+type ClassSchedule {
+  dayOfWeek: String! # e.g., "Monday"
+  startTime: String! # ISO time format
+  endTime: String! # ISO time format
+}
+
+# Define a Room type for class locations
+type Room {
+  _id: ID!
+  building: String!
+  roomNumber: String!
+}
+
+# Define a Grade type with additional details for assessments
+type Grade {
+  _id: ID!
+  course: Course!
+  student: Student!
+  score: Float! # Numeric score
+  gradeLetter: String! # e.g., "A", "B", "C"
+  comments: String # Additional feedback
+}
+
+# Define queries for fetching data
+type Query {
+  users: [User!]!
+  user(id: ID!): User!
+
+  students: [Student!]!
+  student(id: ID!): Student!
+
+  teachers: [Teacher!]!
+  teacher(id: ID!): Teacher!
+
+  courses: [Course!]!
+  course(id: ID!): Course!
+
+  classes: [Class!]!
+  class(id: ID!): Class!
+
+  grades: [Grade!]!
+  grade(id: ID!): Grade!
+
+  guardians: [Guardian!]!
+  guardian(id: ID!): Guardian!
+}
+
+# Define mutations for creating, updating, and deleting records
+type Mutation {
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+  deleteUser(id: ID!): DeleteUserResponse!
+
+  createStudent(input: CreateStudentInput!): Student!
+  updateStudent(id: ID!, input: UpdateStudentInput!): Student!
+  deleteStudent(id: ID!): DeleteStudentResponse!
+
+  createTeacher(input: CreateTeacherInput!): Teacher!
+  updateTeacher(id: ID!, input: UpdateTeacherInput!): Teacher!
+  deleteTeacher(id: ID!): DeleteTeacherResponse!
+
+  createCourse(input: CreateCourseInput!): Course!
+  updateCourse(id: ID!, input: UpdateCourseInput!): Course!
+  deleteCourse(id: ID!): DeleteCourseResponse!
+
+  createClass(input: CreateClassInput!): Class!
+  updateClass(id: ID!, input: UpdateClassInput!): Class!
+  deleteClass(id: ID!): DeleteClassResponse!
+
+  createGrade(input: CreateGradeInput!): Grade!
+  updateGrade(id: ID!, input: UpdateGradeInput!): Grade!
+  deleteGrade(id: ID!): DeleteGradeResponse!
+
+  createGuardian(input: CreateGuardianInput!): Guardian!
+  updateGuardian(id: ID!, input: UpdateGuardianInput!): Guardian!
+  deleteGuardian(id: ID!): DeleteGuardianResponse!
+}
+
+# Input types for creating and updating records
+input CreateUserInput {
+  username: String!
+  email: String!
+  roles: [Role!]!
+}
+
+input UpdateUserInput {
+  username: String
+  email: String
+  roles: [Role!]
+}
+
+input CreateStudentInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  birthdate: String!
+  enrollmentStatus: EnrollmentStatus!
+  guardians: [CreateGuardianInput!]!
+}
+
+input UpdateStudentInput {
+  firstName: String
+  lastName: String
+  email: String
+  birthdate: String
+  enrollmentStatus: EnrollmentStatus
+  guardians: [UpdateGuardianInput!]
+}
+
+input CreateTeacherInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  officeHours: String!
+  subjects: [ID!]! # References to Subject IDs
+}
+
+input UpdateTeacherInput {
+  firstName: String
+  lastName: String
+  email: String
+  officeHours: String
+  subjects: [ID!]
+}
+
+input CreateCourseInput {
+  title: String!
+  description: String!
+  teacherId: ID!
+  prerequisites: [ID!] # References to prerequisite Course IDs
+}
+
+input UpdateCourseInput {
+  title: String
+  description: String
+  teacherId: ID
+  prerequisites: [ID!]
+}
+
+input CreateClassInput {
+  courseId: ID!
+  schedule: [CreateClassScheduleInput!]!
+  location: CreateRoomInput!
+}
+
+input UpdateClassInput {
+  schedule: [CreateClassScheduleInput!]
+  location: CreateRoomInput
+}
+
+input CreateClassScheduleInput {
+  dayOfWeek: String!
+  startTime: String!
+  endTime: String!
+}
+
+input CreateRoomInput {
+  building: String!
+  roomNumber: String!
+}
+
+input CreateGradeInput {
+  courseId: ID!
+  studentId: ID!
+  score: Float!
+  gradeLetter: String!
+  comments: String
+}
+
+input UpdateGradeInput {
+  score: Float
+  gradeLetter: String
+  comments: String
+}
+
+input CreateGuardianInput {
+  name: String!
+  relationship: String!
+  contactInfo: CreateContactInfoInput!
+}
+
+input UpdateGuardianInput {
+  name: String
+  relationship: String
+  contactInfo: CreateContactInfoInput
+}
+
+input CreateContactInfoInput {
+  phone: String
+  email: String
+}
+
+# Response types for delete mutations
+type DeleteUserResponse {
+  deletedUserId: ID!
+}
+
+type DeleteStudentResponse {
+  deletedStudentId: ID!
+}
+
+type DeleteTeacherResponse {
+  deletedTeacherId: ID!
+}
+
+type DeleteCourseResponse {
+  deletedCourseId: ID!
+}
+
+type DeleteClassResponse {
+  deletedClassId: ID!
+}
+
+type DeleteGradeResponse {
+  deletedGradeId: ID!
+}
+
+type DeleteGuardianResponse {
+  deletedGuardianId: ID!
+}
