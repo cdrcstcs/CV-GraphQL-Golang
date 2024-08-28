@@ -260,42 +260,33 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema.graphqls", Input: `# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
-
-type JobListing {
+	{Name: "../schema.graphqls", Input: `type JobListing {
   _id: ID!
   title: String!
   description: String!
   company: String!
   url: String!
 }
-
 type Query {
   jobs: [JobListing!]!
   job(id: ID!): JobListing!
 }
-
 type Mutation {
   createJobListing(input: CreateJobListingInput!): JobListing!
   updateJobListing(id: ID!, input: UpdateJobListingInput!): JobListing!
   deleteJobListing(id: ID!): DeleteJobResponse!
 }
-
 input CreateJobListingInput {
   title: String!
   description: String!
   company: String!
   url: String!
 }
-
 input UpdateJobListingInput {
   title: String
   description: String
   url: String
 }
-
 type DeleteJobResponse {
   deletedJobId: String!
 }
